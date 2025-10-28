@@ -69,6 +69,10 @@ chars_filtered = chars_full[
 if gender_options:
     chars_filtered = chars_filtered[chars_filtered['gender'].isin(gender_options)]
 
+# Convert age to numeric for analysis (handle string values like "Teenager")
+if 'age' in chars_filtered.columns:
+    chars_filtered['age_numeric'] = pd.to_numeric(chars_filtered['age'], errors='coerce')
+
 st.markdown("---")
 
 # Check if we have data
@@ -291,28 +295,43 @@ with tab4:
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            # Box plot of age by gender
-            age_data = chars_filtered[chars_filtered['age_range'].notna()]
-            
-            fig = create_box_plot(
-                age_data,
-                'gender',
-                'age_numeric',
-                "Age Distribution by Gender",
-                color_col='gender'
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            # Box plot of age by gender - only if we have numeric age data
+            if 'age_numeric' in chars_filtered.columns:
+                age_data = chars_filtered[chars_filtered['age_numeric'].notna()]
+                
+                if len(age_data) > 0:
+                    fig = create_box_plot(
+                        age_data,
+                        'gender',
+                        'age_numeric',
+                        "Age Distribution by Gender",
+                        color_col='gender'
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("No numeric age data available for selected filters")
+            else:
+                st.info("Age data not available in numeric format")
         
         with col2:
             st.markdown("### 📊 Age Statistics")
-            for gender in gender_options:
-                gender_ages = chars_filtered[chars_filtered['gender'] == gender]['age_numeric']
-                mean_age = gender_ages.mean()
-                median_age = gender_ages.median()
-                st.write(f"**{gender}**")
-                st.write(f"Mean: {mean_age:.1f} years" if not pd.isna(mean_age) else "Mean: N/A")
-                st.write(f"Median: {median_age:.1f} years" if not pd.isna(median_age) else "Median: N/A")
-                st.write("---")
+            if 'age_numeric' in chars_filtered.columns:
+                for gender in gender_options:
+                    gender_ages = chars_filtered[chars_filtered['gender'] == gender]['age_numeric']
+                    gender_ages = gender_ages.dropna()
+                    
+                    if len(gender_ages) > 0:
+                        mean_age = gender_ages.mean()
+                        median_age = gender_ages.median()
+                        st.write(f"**{gender}**")
+                        st.write(f"Mean: {mean_age:.1f} years")
+                        st.write(f"Median: {median_age:.1f} years")
+                        st.write(f"Count: {len(gender_ages)}")
+                        st.write("---")
+                    else:
+                        st.write(f"**{gender}**: No numeric age data")
+            else:
+                st.info("Numeric age data not available")
         
         # Age range distribution
         st.markdown("### Age Range Distribution by Gender")
