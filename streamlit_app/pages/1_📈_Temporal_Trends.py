@@ -77,9 +77,11 @@ with col1:
     yearly_stats.columns = ['Year', 'Female %', 'Female Protagonist %', 
                            'Gender Parity %', 'Customizable Protagonist %']
     
-    # Convert to percentages
-    for col in yearly_stats.columns[1:]:
-        yearly_stats[col] = yearly_stats[col] * 100
+    # Convert to percentages (char_pct_Female is already in %, others are decimals)
+    yearly_stats['Female Protagonist %'] = yearly_stats['Female Protagonist %'] * 100
+    yearly_stats['Gender Parity %'] = yearly_stats['Gender Parity %'] * 100
+    yearly_stats['Customizable Protagonist %'] = yearly_stats['Customizable Protagonist %'] * 100
+    # Note: 'Female %' is already in percentage format from the CSV
     
     # Line chart for female representation
     fig1 = create_temporal_line_chart(
