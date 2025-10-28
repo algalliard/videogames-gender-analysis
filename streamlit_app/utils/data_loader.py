@@ -29,6 +29,11 @@ def load_data():
         chars = pd.read_csv(data_dir / "characters.grivg.csv")
         sex = pd.read_csv(data_dir / "sexualization.grivg.csv")
         
+        # Strip any whitespace from column names and rename
+        games.columns = games.columns.str.strip()
+        chars.columns = chars.columns.str.strip()
+        sex.columns = sex.columns.str.strip()
+        
         # Rename columns to match expected format
         games_column_map = {
             'Game_Id': 'game_id',
@@ -53,6 +58,7 @@ def load_data():
             'Total_team': 'total_team',
             'female_team': 'female_team',
             'Team_percentage': 'team_percentage',
+            'Metacritic ': 'metacritic',  # Note the space
             'Metacritic': 'metacritic',
             'Destructoid': 'destructoid',
             'IGN': 'ign',
@@ -75,8 +81,8 @@ def load_data():
             'Romantic_Interest': 'is_romantic_interest'
         }
         
-        games = games.rename(columns=games_column_map)
-        chars = chars.rename(columns=chars_column_map)
+        games.rename(columns=games_column_map, inplace=True)
+        chars.rename(columns=chars_column_map, inplace=True)
         
         # Extract year from release_date (format: "Nov-13" -> 2013)
         if 'release_date' in games.columns:
@@ -142,12 +148,7 @@ def load_data():
             chars['is_protagonist'] = chars['plot_relevance'] == 'PA'  # PA = Primary/Protagonist
             chars['is_main_character'] = chars['plot_relevance'].isin(['PA', 'MC'])  # MC = Main Character
         
-        # Identify protagonists from relevance column
-        if 'plot_relevance' in chars.columns:
-            chars['is_protagonist'] = chars['plot_relevance'] == 'PA'  # PA = Primary/Protagonist
-            chars['is_main_character'] = chars['plot_relevance'].isin(['PA', 'MC'])  # MC = Main Character
-        
-        # Convert categorical columns
+        # Convert categorical columns - with safe checks
         if 'gender' in chars.columns:
             chars['gender'] = chars['gender'].astype('category')
         
@@ -161,6 +162,11 @@ def load_data():
             f"Data files not found in {data_dir}. "
             "Please run the preprocessing notebook first to generate cleaned data."
         )
+    except Exception as e:
+        # More detailed error message
+        import traceback
+        error_details = traceback.format_exc()
+        raise Exception(f"Error processing data: {str(e)}\n\nDetails:\n{error_details}")
 
 def get_data_summary(games, chars):
     """
