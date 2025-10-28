@@ -23,7 +23,7 @@ Visit the live dashboard: [Your Streamlit App URL]
 ## 📁 Project Structure
 
 ```
-videogames gender/
+videogames-gender-analysis/
 ├── streamlit_app/
 │   ├── app.py                          # Main dashboard page
 │   ├── requirements.txt                # Python dependencies
@@ -40,6 +40,7 @@ videogames gender/
 ├── characters.grivg.csv                # Character-level data
 ├── games.grivg.csv                     # Game-level data
 ├── sexualization.grivg.csv             # Sexualization data
+├── .gitignore                          # Git ignore rules
 └── README.md                           # This file
 ```
 
@@ -82,19 +83,34 @@ See `streamlit_app/requirements.txt` for complete list.
 
 ## 📊 Data
 
-The analysis is based on three datasets:
+The analysis is based on three CSV datasets located in the root directory:
 
-- **games.grivg.csv** - Game metadata including release year, genre, platform, team composition
-- **characters.grivg.csv** - Character-level information including gender, age, role, plot relevance
-- **sexualization.grivg.csv** - Sexualization indicators for characters
+- **games.grivg.csv** - Game metadata (64 games):
+  - Game ID, title, release date, genre, platform
+  - Team composition (total team size, female team members, percentages)
+  - Protagonist information
+  - Review scores (Metacritic, IGN, GameSpot, etc.)
+
+- **characters.grivg.csv** - Character-level information (600+ characters):
+  - Name, gender, age, species
+  - Playability status, protagonist status
+  - Plot relevance, romantic interest
+  - Sexualization indicators
+
+- **sexualization.grivg.csv** - Detailed sexualization metrics:
+  - Character-specific sexualization data
+  - Visual and narrative indicators
+
+All data is automatically loaded and processed by the Streamlit app from these CSV files.
 
 ## 🔧 Configuration
 
-The app uses preprocessed data loaded from CSV files. To use your own data:
+The app automatically loads data from the three CSV files in the root directory:
+- `games.grivg.csv`
+- `characters.grivg.csv`
+- `sexualization.grivg.csv`
 
-1. Update the CSV files in the root directory
-2. Ensure column names match the expected format (see `utils/data_loader.py`)
-3. Restart the Streamlit app
+No preprocessing or additional setup is required - the data is loaded and transformed automatically by `utils/data_loader.py`.
 
 ## 📈 Analysis Framework
 
