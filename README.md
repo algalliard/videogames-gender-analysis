@@ -4,7 +4,7 @@
 
 ## 📊 Project Overview
 
-This interactive Streamlit dashboard provides a comprehensive analysis of gender representation in video games from 2012-2022. The project examines patterns across multiple dimensions including temporal trends, character roles, sexualization, team composition, and intersectional patterns.
+This interactive Streamlit dashboard provides a comprehensive analysis of gender representation in video games from 2012-2022, data obtained from Kaggle public dataset https://www.kaggle.com/datasets/br33sa/gender-representation-in-video-games/ by Brisa. The project examines patterns across multiple dimensions including temporal trends, character roles, sexualization, team composition, and intersectional patterns.
 
 ## 🎯 Features
 
@@ -18,7 +18,7 @@ The dashboard includes 5 analytical pages:
 
 ## 🚀 Live Demo
 
-Visit the live dashboard: [Your Streamlit App URL]
+Visit the live dashboard: [Link](https://videogames-gender-analysis-jutskwb47xnnntjg7lnkkx.streamlit.app)
 
 ## 📁 Project Structure
 
@@ -134,11 +134,11 @@ This project is for educational and research purposes.
 
 ## 👥 Authors
 
-- Your Name - Initial work
+- Al Gallego - Initial work
 
 ## 🙏 Acknowledgments
 
-- Data sourced from video game databases
+- Data sourced from video game databases retrieved by Brisa in Kaggle
 - Built with Streamlit, Plotly, and Pandas
 
 ## 📧 Contact
