@@ -138,7 +138,9 @@ def load_data():
             chars['playable'] = chars['is_playable']  # Alias
         
         if 'is_sexualized' in chars.columns:
-            chars['is_sexualized'] = chars['is_sexualized'] == 1
+            # Keep original sexualization level (0-3) and create boolean for any sexualization
+            chars['sexualization_level'] = chars['is_sexualized']
+            chars['is_sexualized'] = chars['is_sexualized'] > 0  # Any value > 0 means sexualized
         
         if 'is_romantic_interest' in chars.columns:
             chars['is_romantic_interest'] = chars['is_romantic_interest'].str.lower().isin(['yes', 'true'])
