@@ -57,7 +57,7 @@ year_range = st.sidebar.slider(
 gender_options = st.sidebar.multiselect(
     "Gender",
     options=['Male', 'Female', 'Non-binary', 'Custom'],
-    default=['Male', 'Female', 'Custom']  # Include Custom by default (customizable protagonists)
+    default=['Male', 'Female', 'Non-binary', 'Custom']  # Include all genders by default
 )
 
 # Filter data
@@ -363,12 +363,12 @@ with tab5:
     st.header("H2e: Romantic Interest Patterns")
     st.markdown("**Hypothesis**: Female characters are more likely to be defined by romantic interest relationships")
     
-    if 'romantic_interest' in chars_filtered.columns:
+    if 'is_romantic_interest' in chars_filtered.columns:
         col1, col2 = st.columns(2)
         
         with col1:
             # Romantic interest rate by gender
-            romantic_rate = chars_filtered.groupby('gender')['romantic_interest'].mean() * 100
+            romantic_rate = chars_filtered.groupby('gender')['is_romantic_interest'].mean() * 100
             
             fig = create_gender_bar_chart(
                 romantic_rate,
@@ -380,8 +380,8 @@ with tab5:
             st.markdown("### 📊 Statistics")
             for gender in gender_options:
                 gender_chars = chars_filtered[chars_filtered['gender'] == gender]
-                romantic_pct = gender_chars['romantic_interest'].mean() * 100
-                romantic_count = gender_chars['romantic_interest'].sum()
+                romantic_pct = gender_chars['is_romantic_interest'].mean() * 100
+                romantic_count = gender_chars['is_romantic_interest'].sum()
                 
                 st.metric(
                     f"{gender} Romantic Interest",
@@ -393,7 +393,7 @@ with tab5:
         st.markdown("### Romantic Interest by Gender and Role")
         romantic_role = pd.crosstab(
             [chars_filtered['gender'], chars_filtered['is_protagonist']],
-            chars_filtered['romantic_interest']
+            chars_filtered['is_romantic_interest']
         )
         romantic_role.index.names = ['Gender', 'Is Protagonist']
         st.dataframe(romantic_role, use_container_width=True)
