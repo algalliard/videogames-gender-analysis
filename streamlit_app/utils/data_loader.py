@@ -7,12 +7,11 @@ from pathlib import Path
 import streamlit as st
 
 def get_data_path():
-    """Get the path to the processed data directory"""
-    # App is in videogames gender/streamlit_app/, data is in ../../processed/
-    app_dir = Path(__file__).parent.parent  # videogames gender/streamlit_app/
+    """Get the path to the data directory"""
+    # App is in streamlit_app/, data is in parent directory
+    app_dir = Path(__file__).parent.parent  # streamlit_app/
     parent_dir = app_dir.parent  # videogames gender/
-    data_dir = parent_dir.parent / "processed"  # kaggle/processed/
-    return data_dir
+    return parent_dir
 
 @st.cache_data
 def load_data():
@@ -25,9 +24,10 @@ def load_data():
     data_dir = get_data_path()
     
     try:
-        games = pd.read_csv(data_dir / "games_clean.csv")
-        chars = pd.read_csv(data_dir / "characters_clean.csv")
-        sex = pd.read_csv(data_dir / "sexualization_clean.csv")
+        # Load the CSV files with original names
+        games = pd.read_csv(data_dir / "games.grivg.csv")
+        chars = pd.read_csv(data_dir / "characters.grivg.csv")
+        sex = pd.read_csv(data_dir / "sexualization.grivg.csv")
         
         # Convert boolean columns back to boolean
         bool_cols_games = ['customizable_main', 'has_female_team', 'has_non_male_protagonist', 
