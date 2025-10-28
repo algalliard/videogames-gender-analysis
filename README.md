@@ -134,11 +134,11 @@ This project is for educational and research purposes.
 
 ## 👥 Authors
 
-- Your Name - Initial work
+- Al Gallego - Initial work
 
 ## 🙏 Acknowledgments
 
-- Data sourced from video game databases
+- Data sourced from video game databases retrieved by Brisa in Kaggle
 - Built with Streamlit, Plotly, and Pandas
 
 ## 📧 Contact
