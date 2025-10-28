@@ -106,13 +106,6 @@ try:
             default=available_genders
         )
         
-        # Platform filter
-        if 'platform' in games.columns:
-            platforms = ['All'] + sorted(games['platform'].dropna().unique().tolist())
-            selected_platform = st.selectbox("Filter by Platform", platforms)
-        else:
-            selected_platform = 'All'
-        
         st.divider()
         st.markdown("### 📖 About")
         st.info("""
