@@ -6,6 +6,9 @@ import pandas as pd
 from pathlib import Path
 import streamlit as st
 
+# Cache version - increment this to force cache invalidation
+CACHE_VERSION = 2
+
 def get_data_path():
     """Get the path to the data directory"""
     # App is in streamlit_app/, data is in parent directory
@@ -13,10 +16,12 @@ def get_data_path():
     parent_dir = app_dir.parent  # videogames gender/
     return parent_dir
 
-@st.cache_data
+@st.cache_data(hash_funcs={type(None): lambda _: None}, show_spinner=False, ttl=None, max_entries=1)
 def load_data():
     """
     Load the cleaned and processed datasets
+    
+    Cache version: 2 (Fixed sexualization to include levels 1-3, not just 1)
     
     Returns:
         tuple: (games, characters, sexualization) DataFrames
