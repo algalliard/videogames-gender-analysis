@@ -57,7 +57,7 @@ year_range = st.sidebar.slider(
 gender_options = st.sidebar.multiselect(
     "Gender",
     options=['Male', 'Female', 'Non-binary', 'Custom'],
-    default=['Male', 'Female']
+    default=['Male', 'Female', 'Custom']  # Include Custom by default (customizable protagonists)
 )
 
 # Filter data
