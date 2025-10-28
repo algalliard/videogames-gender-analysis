@@ -29,28 +29,123 @@ def load_data():
         chars = pd.read_csv(data_dir / "characters.grivg.csv")
         sex = pd.read_csv(data_dir / "sexualization.grivg.csv")
         
-        # Convert boolean columns back to boolean (only if they exist)
-        bool_cols_games = ['customizable_main', 'has_female_team', 'has_non_male_protagonist', 
-                          'high_female_representation', 'is_multiplatform', 'has_gender_parity',
-                          'has_female_protagonist', 'has_male_protagonist']
+        # Rename columns to match expected format
+        games_column_map = {
+            'Game_Id': 'game_id',
+            'Title': 'title',
+            'Release': 'release_date',
+            'Series': 'series',
+            'Genre': 'genre',
+            'Sub-genre': 'sub_genre',
+            'Developer': 'developer',
+            'Publisher': 'publisher',
+            'Country': 'country',
+            'Platform': 'platform',
+            'PEGI': 'pegi',
+            'Customizable_main': 'customizable_main',
+            'Protagonist': 'protagonist',
+            'Protagonist_Non_Male': 'protagonist_non_male',
+            'Relevant_males': 'relevant_males',
+            'Relevant_no_males': 'relevant_no_males',
+            'Percentage_non_male': 'char_pct_Female',
+            'Criteria': 'criteria',
+            'Director': 'director',
+            'Total_team': 'total_team',
+            'female_team': 'female_team',
+            'Team_percentage': 'team_percentage',
+            'Metacritic': 'metacritic',
+            'Destructoid': 'destructoid',
+            'IGN': 'ign',
+            'GameSpot': 'gamespot',
+            'Avg_Reviews': 'avg_reviews'
+        }
         
-        bool_cols_chars = ['playable', 'romantic_interest', 'is_sexualized', 'high_sexualization',
-                          'is_protagonist', 'is_main_character', 'is_antagonist', 'is_playable',
-                          'is_romantic_interest']
+        chars_column_map = {
+            'Name': 'name',
+            'Gender': 'gender',
+            'Game': 'game',
+            'Age': 'age',
+            'Age_range': 'age_range',
+            'Playable': 'is_playable',
+            'Sexualization': 'is_sexualized',
+            'Id': 'char_id',
+            'Species': 'species',
+            'Side': 'side',
+            'Relevance': 'plot_relevance',
+            'Romantic_Interest': 'is_romantic_interest'
+        }
         
-        for col in bool_cols_games:
-            if col in games.columns:
+        games = games.rename(columns=games_column_map)
+        chars = chars.rename(columns=chars_column_map)
+        
+        # Extract year from release_date (format: "Nov-13" -> 2013)
+        if 'release_date' in games.columns:
+            def parse_release_year(date_str):
+                if pd.isna(date_str):
+                    return None
                 try:
-                    games[col] = games[col].astype(bool)
+                    # Format is "Nov-13" where 13 is 2013
+                    year_part = str(date_str).split('-')[-1]
+                    year = int(year_part)
+                    # Assume 00-99 maps to 2000-2099
+                    if year < 100:
+                        year = 2000 + year
+                    return year
                 except:
-                    pass  # Skip if conversion fails
+                    return None
+            
+            games['release_year'] = games['release_date'].apply(parse_release_year)
         
-        for col in bool_cols_chars:
-            if col in chars.columns:
-                try:
-                    chars[col] = chars[col].astype(bool)
-                except:
-                    pass  # Skip if conversion fails
+        # Convert percentage strings to floats (e.g., "18%" -> 18.0)
+        if 'char_pct_Female' in games.columns:
+            games['char_pct_Female'] = games['char_pct_Female'].str.rstrip('%').astype(float)
+        
+        if 'team_percentage' in games.columns:
+            games['team_percentage'] = games['team_percentage'].str.rstrip('%').astype(float)
+        
+        # Create derived boolean columns
+        # Has female protagonist - check if any protagonist is not male
+        games['has_female_protagonist'] = games['protagonist_non_male'] > 0
+        
+        # Has male protagonist
+        if 'relevant_males' in games.columns:
+            games['has_male_protagonist'] = games['relevant_males'] > 0
+        
+        # Has gender parity (40-60% female characters)
+        if 'char_pct_Female' in games.columns:
+            games['has_gender_parity'] = (games['char_pct_Female'] >= 40) & (games['char_pct_Female'] <= 60)
+        
+        # Has female team members
+        if 'female_team' in games.columns:
+            games['has_female_team'] = games['female_team'] > 0
+        
+        # Convert customizable_main to boolean
+        if 'customizable_main' in games.columns:
+            games['customizable_main'] = games['customizable_main'].str.lower().isin(['yes', 'true', '1'])
+        
+        # Add game_id to characters for joining
+        chars['game_id'] = chars['game']
+        
+        # Convert playable and sexualization to boolean
+        if 'is_playable' in chars.columns:
+            chars['is_playable'] = chars['is_playable'] == 1
+            chars['playable'] = chars['is_playable']  # Alias
+        
+        if 'is_sexualized' in chars.columns:
+            chars['is_sexualized'] = chars['is_sexualized'] == 1
+        
+        if 'is_romantic_interest' in chars.columns:
+            chars['is_romantic_interest'] = chars['is_romantic_interest'].str.lower().isin(['yes', 'true'])
+        
+        # Identify protagonists from relevance column
+        if 'plot_relevance' in chars.columns:
+            chars['is_protagonist'] = chars['plot_relevance'] == 'PA'  # PA = Primary/Protagonist
+            chars['is_main_character'] = chars['plot_relevance'].isin(['PA', 'MC'])  # MC = Main Character
+        
+        # Identify protagonists from relevance column
+        if 'plot_relevance' in chars.columns:
+            chars['is_protagonist'] = chars['plot_relevance'] == 'PA'  # PA = Primary/Protagonist
+            chars['is_main_character'] = chars['plot_relevance'].isin(['PA', 'MC'])  # MC = Main Character
         
         # Convert categorical columns
         if 'gender' in chars.columns:
