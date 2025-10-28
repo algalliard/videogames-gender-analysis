@@ -61,11 +61,17 @@ gender_options = st.sidebar.multiselect(
 )
 
 # Filter data
-chars_filtered = chars_full[
-    (chars_full['release_year'].notna()) &
-    (chars_full['release_year'] >= year_range[0]) & 
-    (chars_full['release_year'] <= year_range[1])
-]
+# Note: We keep characters even if release_year is missing to avoid data loss
+chars_filtered = chars_full.copy()
+
+# Apply year filter only to characters that have a valid release year
+if year_range:
+    chars_filtered = chars_filtered[
+        (chars_filtered['release_year'].isna()) |  # Keep NaN years
+        ((chars_filtered['release_year'] >= year_range[0]) & 
+         (chars_filtered['release_year'] <= year_range[1]))
+    ]
+
 if gender_options:
     chars_filtered = chars_filtered[chars_filtered['gender'].isin(gender_options)]
 
