@@ -18,7 +18,7 @@ The dashboard includes 5 analytical pages:
 
 ## 🚀 Live Demo
 
-Visit the live dashboard: [Your Streamlit App URL]
+Visit the live dashboard: [Link](https://videogames-gender-analysis-jutskwb47xnnntjg7lnkkx.streamlit.app)
 
 ## 📁 Project Structure
 
