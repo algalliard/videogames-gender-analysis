@@ -117,9 +117,14 @@ with tab1:
         
         with col1:
             # Box plot comparing female % by protagonist gender
-            games_filtered['protagonist_type'] = 'Male Protagonist'
-            games_filtered.loc[games_filtered['has_female_protagonist'] == True, 'protagonist_type'] = 'Female Protagonist'
-            games_filtered.loc[games_filtered['has_non_male_protagonist'] == True, 'protagonist_type'] = 'Non-Male Protagonist'
+            # Create protagonist type based on available columns
+            games_filtered['protagonist_type'] = 'Other'
+            
+            if 'has_male_protagonist' in games_filtered.columns:
+                games_filtered.loc[games_filtered['has_male_protagonist'] == True, 'protagonist_type'] = 'Male Protagonist'
+            
+            if 'has_female_protagonist' in games_filtered.columns:
+                games_filtered.loc[games_filtered['has_female_protagonist'] == True, 'protagonist_type'] = 'Female Protagonist'
             
             fig = create_box_plot(
                 games_filtered[games_filtered['char_pct_Female'].notna()],
@@ -132,37 +137,46 @@ with tab1:
         with col2:
             st.markdown("### 📊 Key Statistics")
             
-            # Calculate means for each protagonist type
-            female_protag_games = games_filtered[games_filtered['has_female_protagonist'] == True]
-            male_protag_games = games_filtered[games_filtered['has_male_protagonist'] == True]
+            # Calculate means for each protagonist type - with safe column checks
+            if 'has_female_protagonist' in games_filtered.columns:
+                female_protag_games = games_filtered[games_filtered['has_female_protagonist'] == True]
+                if len(female_protag_games) > 0:
+                    avg_female_with_female_protag = female_protag_games['char_pct_Female'].mean()
+                    st.metric("With Female Protagonist", f"{avg_female_with_female_protag:.1f}%")
             
-            if len(female_protag_games) > 0:
-                avg_female_with_female_protag = female_protag_games['char_pct_Female'].mean()
-                st.metric("With Female Protagonist", f"{avg_female_with_female_protag:.1f}%")
+            if 'has_male_protagonist' in games_filtered.columns:
+                male_protag_games = games_filtered[games_filtered['has_male_protagonist'] == True]
+                if len(male_protag_games) > 0:
+                    avg_female_with_male_protag = male_protag_games['char_pct_Female'].mean()
+                    st.metric("With Male Protagonist", f"{avg_female_with_male_protag:.1f}%")
             
-            if len(male_protag_games) > 0:
-                avg_female_with_male_protag = male_protag_games['char_pct_Female'].mean()
-                st.metric("With Male Protagonist", f"{avg_female_with_male_protag:.1f}%")
-            
-            # Statistical test
-            if len(female_protag_games) > 0 and len(male_protag_games) > 0:
-                female_vals = female_protag_games['char_pct_Female'].dropna()
-                male_vals = male_protag_games['char_pct_Female'].dropna()
+            # Statistical test - only if both columns exist
+            if ('has_female_protagonist' in games_filtered.columns and 
+                'has_male_protagonist' in games_filtered.columns):
                 
-                if len(female_vals) > 1 and len(male_vals) > 1:
-                    t_stat, p_value = stats.ttest_ind(female_vals, male_vals)
+                female_protag_games = games_filtered[games_filtered['has_female_protagonist'] == True]
+                male_protag_games = games_filtered[games_filtered['has_male_protagonist'] == True]
+                
+                if len(female_protag_games) > 0 and len(male_protag_games) > 0:
+                    female_vals = female_protag_games['char_pct_Female'].dropna()
+                    male_vals = male_protag_games['char_pct_Female'].dropna()
                     
-                    st.markdown("---")
-                    st.markdown("### 🎯 Statistical Test")
-                    st.write(f"t-statistic: {t_stat:.2f}")
-                    st.write(f"p-value: {p_value:.4f}")
-                    
-                    if p_value < 0.05:
-                        st.success("✅ Significant difference detected")
-                        diff = avg_female_with_female_protag - avg_female_with_male_protag
-                        st.write(f"Difference: {diff:.1f} percentage points")
-                    else:
-                        st.info("No significant difference")
+                    if len(female_vals) > 1 and len(male_vals) > 1:
+                        t_stat, p_value = stats.ttest_ind(female_vals, male_vals)
+                        
+                        st.markdown("---")
+                        st.markdown("### 🎯 Statistical Test")
+                        st.write(f"t-statistic: {t_stat:.2f}")
+                        st.write(f"p-value: {p_value:.4f}")
+                        
+                        if p_value < 0.05:
+                            st.success("✅ Significant difference detected")
+                            avg_female_with_female_protag = female_protag_games['char_pct_Female'].mean()
+                            avg_female_with_male_protag = male_protag_games['char_pct_Female'].mean()
+                            diff = avg_female_with_female_protag - avg_female_with_male_protag
+                            st.write(f"Difference: {diff:.1f} percentage points")
+                        else:
+                            st.info("No significant difference")
         
         # Scatter plot
         st.markdown("### Protagonist Gender vs Overall Female Representation")
