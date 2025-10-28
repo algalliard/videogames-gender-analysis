@@ -29,21 +29,28 @@ def load_data():
         chars = pd.read_csv(data_dir / "characters.grivg.csv")
         sex = pd.read_csv(data_dir / "sexualization.grivg.csv")
         
-        # Convert boolean columns back to boolean
+        # Convert boolean columns back to boolean (only if they exist)
         bool_cols_games = ['customizable_main', 'has_female_team', 'has_non_male_protagonist', 
                           'high_female_representation', 'is_multiplatform', 'has_gender_parity',
                           'has_female_protagonist', 'has_male_protagonist']
         
         bool_cols_chars = ['playable', 'romantic_interest', 'is_sexualized', 'high_sexualization',
-                          'is_protagonist', 'is_main_character', 'is_antagonist']
+                          'is_protagonist', 'is_main_character', 'is_antagonist', 'is_playable',
+                          'is_romantic_interest']
         
         for col in bool_cols_games:
             if col in games.columns:
-                games[col] = games[col].astype(bool)
+                try:
+                    games[col] = games[col].astype(bool)
+                except:
+                    pass  # Skip if conversion fails
         
         for col in bool_cols_chars:
             if col in chars.columns:
-                chars[col] = chars[col].astype(bool)
+                try:
+                    chars[col] = chars[col].astype(bool)
+                except:
+                    pass  # Skip if conversion fails
         
         # Convert categorical columns
         if 'gender' in chars.columns:
@@ -79,7 +86,11 @@ def get_data_summary(games, chars):
     
     # Time range
     if 'release_year' in games.columns:
-        summary['year_range'] = (games['release_year'].min(), games['release_year'].max())
+        years = games['release_year'].dropna()
+        if len(years) > 0:
+            summary['year_range'] = (int(years.min()), int(years.max()))
+        else:
+            summary['year_range'] = (None, None)
     else:
         summary['year_range'] = (None, None)
     

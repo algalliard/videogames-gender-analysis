@@ -73,21 +73,30 @@ try:
         st.header("📊 Dataset Overview")
         summary = get_data_summary(games, chars)
         
-        st.metric("Total Games", summary['total_games'])
-        st.metric("Total Characters", summary['total_characters'])
-        st.metric("Time Span", f"{summary['year_range'][0]:.0f} - {summary['year_range'][1]:.0f}")
+        st.metric("Total Games", f"{summary['total_games']:,}")
+        st.metric("Total Characters", f"{summary['total_characters']:,}")
+        
+        # Handle year range with None check
+        year_min, year_max = summary['year_range']
+        if year_min is not None and year_max is not None:
+            st.metric("Time Span", f"{int(year_min)} - {int(year_max)}")
+        else:
+            st.metric("Time Span", "N/A")
         
         st.divider()
         
         st.header("🔍 Filters")
         
-        # Year range filter
-        year_range = st.slider(
-            "Select Year Range",
-            int(summary['year_range'][0]),
-            int(summary['year_range'][1]),
-            (int(summary['year_range'][0]), int(summary['year_range'][1]))
-        )
+        # Year range filter - only if we have valid years
+        if year_min is not None and year_max is not None:
+            year_range = st.slider(
+                "Select Year Range",
+                int(year_min),
+                int(year_max),
+                (int(year_min), int(year_max))
+            )
+        else:
+            year_range = None
         
         # Gender filter
         available_genders = chars['gender'].dropna().unique().tolist()
